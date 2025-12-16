@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "273285934494",
+    "project_id": "nytimesbooksapp",
+    "storage_bucket": "nytimesbooksapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:273285934494:android:c1392b8b9aa00060ecfa8f",
+        "android_client_info": {
+          "package_name": "com.example.nytimesbooksapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAn68DIcWJPIpEBPnwIBnyl3DVpQLc0fh0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

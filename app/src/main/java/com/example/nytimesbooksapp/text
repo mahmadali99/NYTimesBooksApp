@@ -1,0 +1,1779 @@
+package com.example.nytimesbooksapp.data.controlpanel
+
+import com.example.nytimesbooksapp.BuildConfig
+
+
+// Class Description:
+
+// |----------------------------------------------------------------------------------|
+// |     This class acts as a centralized, type-safe place for all my constants.    |
+// | it  is like as my app’s -> control panel. I’ll use it for URLs, keys,timeouts,|
+// |  and similar configuration items.                                                |
+// |                                                                                  |
+// |                                                                                  |
+// |----------------------------------------------------------------------------------|
+
+sealed class AppConfig {
+    companion object{
+
+        const val  TIMEOUT = 30L // seconds
+        const val  DATABASE_NAME = "Books_db"
+
+        val BASE_URL = BuildConfig.BASE_URL
+        val API_KEY = BuildConfig.API_KEY
+    }
+}
+
+package com.example.nytimesbooksapp.data.local.datastore
+
+import android.content.Context
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+
+private val Context.dataStore by preferencesDataStore(name = "user_prefs")
+
+@Singleton
+class UserPreferencesDataStore @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
+    companion object {
+        private val LAST_SYNC_TIME = longPreferencesKey("last_sync_time")
+        private val IS_DARK_MODE = booleanPreferencesKey("isDarkMode")
+
+        private val SELECTED_DATE = stringPreferencesKey("selected_date")
+    }
+
+
+    val isDarkMode : Flow<Boolean> = context.dataStore.data
+        .map { pref ->
+            pref[IS_DARK_MODE] ?: false
+        }
+
+    suspend fun updateLastSyncTime(timestamp: Long) {
+        context.dataStore.edit { prefs ->
+            prefs[LAST_SYNC_TIME] = timestamp
+        }
+    }
+
+    val lastSyncTime: Flow<Long> = context.dataStore.data
+        .map { prefs -> prefs[LAST_SYNC_TIME] ?: 0L }
+
+
+    suspend fun setTheme(isDark: Boolean){
+        context.dataStore.edit { pref ->
+            pref[IS_DARK_MODE] = isDark
+        }
+    }
+    val selectedDate : Flow<String> = context.dataStore.data
+        .map { prefs-> prefs[SELECTED_DATE] ?:""  }
+
+    suspend fun selectDate(date : String){
+        context.dataStore.edit { prefs->
+            prefs[SELECTED_DATE] = date
+        }
+
+    }
+
+
+}
+package com.example.nytimesbooksapp.data.local.mapper
+
+import com.example.nytimesbooksapp.data.local.roomdatabase.bookentity.BookEntity
+import com.example.nytimesbooksapp.domain.model.Book
+
+fun BookEntity.toDomain(): Book = Book(
+    title = title,
+    author = author,
+    description = description,
+    imageUrl = imageUrl,
+    publisher = publisher,
+    publishedDate = publishedDate,
+    primaryIsbn13 = primaryIsbn13,
+    rank = rank
+)
+
+fun Book.toEntity(): BookEntity = BookEntity(
+    title = title,
+    author = author,
+    description = description,
+    imageUrl = imageUrl,
+    publisher = publisher,
+    publishedDate = publishedDate,
+    primaryIsbn13 = primaryIsbn13,
+            rank = rank
+)
+
+package com.example.nytimesbooksapp.data.local.repository
+
+import com.example.nytimesbooksapp.data.local.roomdatabase.dao.BookDao
+import com.example.nytimesbooksapp.data.local.mapper.toDomain
+import com.example.nytimesbooksapp.data.local.mapper.toEntity
+import com.example.nytimesbooksapp.data.remote.BooksApiService
+import com.example.nytimesbooksapp.data.remote.toDomainBooks
+import com.example.nytimesbooksapp.domain.model.Book
+import com.example.nytimesbooksapp.domain.repository.BookRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import javax.inject.Inject
+
+class BookRepositoryImpl @Inject constructor(
+    private val apiService: BooksApiService,
+    private val bookDao: BookDao,
+) : BookRepository {
+
+    override suspend fun getBooks(forceRefresh: Boolean): Flow<List<Book>> = flow {
+        val cachedBooks = bookDao.getAllBooks().map { it.toDomain() }
+        if (cachedBooks.isNotEmpty()) emit(cachedBooks)
+
+        if (forceRefresh || cachedBooks.isEmpty()) {
+            try {
+                val response = apiService.getBooksOverview()
+                val networkBooks = response.toDomainBooks()
+
+                bookDao.clearBooks()
+                bookDao.insertBooks(networkBooks.map { it.toEntity() })
+
+                emit(networkBooks)
+            } catch (e: Exception) {
+                emit(cachedBooks)
+            }
+        }
+    }.flowOn(Dispatchers.IO)
+
+    override suspend fun getCachedBooks(): List<Book> {
+        return bookDao.getAllBooks().map { it.toDomain() }
+
+    }
+
+
+
+    suspend fun searchBooks(query: String): List<Book> {
+        //  Search cached books
+        val localResults = bookDao.searchBooksByTitle(query).map { it.toDomain() }
+
+        // Search API
+        val remoteResults = try {
+            val response = apiService.getBooksOverview()
+            response.toDomainBooks()
+                .filter { it.title?.contains(query, ignoreCase = true) == true }
+                .onEach { bookDao.insertBooks(listOf(it.toEntity())) } // update cache
+        } catch (e: Exception) {
+            emptyList()
+        }
+
+        return (localResults + remoteResults).distinctBy { it.title }
+    }
+
+    // added later
+     override suspend fun getBookByIsbn(isbn: String): Book?{
+         val local = bookDao.getBookByIsbn(isbn)//?.toDomain()
+        if (local!= null ) return local.toDomain()
+
+     return try {
+         val network = apiService.getBooksOverview().toDomainBooks()
+         val found = network.find { it.primaryIsbn13 == isbn }
+         found?.let { bookDao.insertBooks(listOf(it.toEntity())) }
+         found
+     } catch (e: Exception)
+     {
+         null
+     }
+     }
+
+    override suspend fun getBooksByDate(date: String): List<Book> {
+        return try {
+
+
+            val response = apiService.getBooksOverview(date)
+            val networkBooks = response.toDomainBooks()
+            bookDao.clearBooks()
+            bookDao.insertBooks(networkBooks.map { it.toEntity() })
+            networkBooks
+        }
+        catch (e: Exception)
+        {
+            bookDao.getAllBooks().map { it.toDomain() }
+        }
+    }
+
+
+
+}
+
+package com.example.nytimesbooksapp.data.local.roomdatabase.bookentity
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "Books")
+data class BookEntity(
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    val title: String?,
+    val author: String?,
+    val imageUrl: String?,
+    val description: String?,
+    val publisher: String?,
+    val publishedDate: String?,
+    val primaryIsbn13:String?,
+    val rank: String?
+)
+
+package com.example.nytimesbooksapp.data.local.roomdatabase.booksdb
+
+import androidx.room.Database
+import androidx.room.RoomDatabase
+import com.example.nytimesbooksapp.data.local.roomdatabase.dao.BookDao
+import com.example.nytimesbooksapp.data.local.roomdatabase.bookentity.BookEntity
+
+@Database(entities = [BookEntity::class], version = 1, exportSchema = false)
+abstract class BooksDb : RoomDatabase()
+{
+
+    abstract fun booksDao(): BookDao
+}
+
+package com.example.nytimesbooksapp.data.local.roomdatabase.dao
+
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import com.example.nytimesbooksapp.data.local.roomdatabase.bookentity.BookEntity
+
+//@Dao
+//interface BookDao {
+//
+//    @Query("SELECT * FROM books")
+//    suspend fun getAllBooks(): List<BookEntity>
+//
+//    @Insert(onConflict = OnConflictStrategy.REPLACE)
+//    suspend fun insertBooks(books: List<BookEntity>)
+//
+//    @Query("DELETE FROM books")
+//    suspend fun clearBooks()
+//}
+@Dao
+interface BookDao {
+
+    @Query("SELECT * FROM books")
+    suspend fun getAllBooks(): List<BookEntity>
+    @Query("SELECT * FROM Books WHERE primaryIsbn13 = :isbn LIMIT 1")
+    suspend fun getBookByIsbn(isbn:String): BookEntity?
+
+    @Query("SELECT * FROM books WHERE title LIKE '%' || :query || '%'")
+    suspend fun searchBooksByTitle(query: String): List<BookEntity>
+
+
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertBooks(books: List<BookEntity>)
+
+    @Query("DELETE FROM books")
+    suspend fun clearBooks()
+}
+
+
+package com.example.nytimesbooksapp.data.local.roomdatabase
+
+import android.content.Context
+import androidx.room.Room
+import com.example.nytimesbooksapp.data.controlpanel.AppConfig
+import com.example.nytimesbooksapp.data.local.roomdatabase.dao.BookDao
+import com.example.nytimesbooksapp.data.local.roomdatabase.booksdb.BooksDb
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+@Module
+@InstallIn(SingletonComponent::class)
+object DatabaseModule{
+    @Provides
+    @Singleton
+    fun provideBooksDatabase(@ApplicationContext context : Context): BooksDb{
+        return Room.databaseBuilder(
+
+            context,
+            BooksDb::class.java,
+            AppConfig.DATABASE_NAME // here I'm Using my Constant which is defined separately in AppConfig class as Database name
+        ).build()
+    }
+
+
+    @Provides
+    @Singleton
+    fun providesBooksDatabase(database: BooksDb) : BookDao = database.booksDao()
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+package com.example.nytimesbooksapp.data.remote
+
+import com.example.nytimesbooksapp.data.controlpanel.AppConfig
+import okhttp3.Interceptor
+import okhttp3.Response
+
+class ApikeyInterceptor : Interceptor{
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val originalRequest = chain.request()
+        val originalUrl = originalRequest.url
+
+        val newUrl = originalUrl.newBuilder()
+            .addQueryParameter("api-key", AppConfig.API_KEY)
+            .build()
+
+        val newRequest = originalRequest.newBuilder()
+            .url(newUrl)
+            .build()
+
+        return chain.proceed(newRequest)
+    }
+
+}
+
+
+
+
+package com.example.nytimesbooksapp.data.remote
+
+import com.example.nytimesbooksapp.domain.model.Book
+
+fun BooksResponseDto.toDomainBooks(): List<Book>
+{
+    val allBooks = mutableListOf<Book>()
+    val result = results ?: return emptyList()
+
+
+    result.lists?.forEach { list ->
+        list.books?.forEach { dto ->
+
+            allBooks.add(
+                Book(
+                    title = dto.title,
+                    author = dto.author,
+                    description = dto.description,
+                    imageUrl = dto.book_image,
+                    publisher = dto.publisher,
+                    publishedDate = result.published_date,
+                    primaryIsbn13 = dto.primaryIsbn13,
+                    rank = dto.rank
+                )
+            )
+        }
+    }
+
+    return allBooks
+}
+
+package com.example.nytimesbooksapp.data.remote
+
+import com.example.nytimesbooksapp.BuildConfig
+import retrofit2.http.GET
+import retrofit2.http.Path
+import retrofit2.http.Query
+// This is my Retrofit Interface
+interface BooksApiService {
+//    @GET("lists/overview.json") // here is my API's END POINT ( GIVEN)
+//    suspend fun getBooksOverview(
+//        @Query("published_date") publishesDate:String? = null
+//    ):BooksResponseDto
+
+
+
+//    @GET("lists/current/hardcover-fiction.json")
+//    suspend fun getBooksOverview(
+//        @Query("api-key") apikey:String = BuildConfig.API_KEY
+//    ): BooksResponseDto
+//
+//
+//    @GET("lists/{date}/hardcover-fiction.json")
+//    suspend fun getBooksByDate(
+//        @Path("date") date: String,
+//        @Query("api-key") apikey: String = BuildConfig.API_KEY
+//    ): BooksResponseDto
+
+
+        // MAIN ENDPOINT (supports published_date filter)
+        @GET("lists/overview.json")
+        suspend fun getBooksOverview(
+            @Query("published_date") publishedDate: String? = null,
+            @Query("api-key") apiKey: String = BuildConfig.API_KEY
+        ): BooksResponseDto
+
+
+    }
+
+package com.example.nytimesbooksapp.data.remote
+
+import com.google.gson.annotations.SerializedName
+
+data class BooksResponseDto(
+
+    val results: BooksResultDto? // nullable in case API changes
+)
+
+data class BooksResultDto(
+    val published_date: String?,
+    val lists: List<BookListDto>?
+)
+
+data class BookListDto(
+//    val display_name: String?,
+    val books: List<BookDto>?
+)
+
+data class BookDto(
+    val title: String?,
+    val author: String?,
+    val description: String?,
+    val book_image: String?,
+    val publisher: String?,
+    @SerializedName("primary_isbn13")
+    val primaryIsbn13:String,
+    val rank : String
+)
+package com.example.nytimesbooksapp.data.remote
+
+import com.example.nytimesbooksapp.data.controlpanel.AppConfig
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+object NetworkModule {
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(): OkHttpClient {
+        val logging = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
+        return OkHttpClient.Builder()
+            .addInterceptor(ApikeyInterceptor())
+            .addInterceptor(logging)
+            .connectTimeout(AppConfig.TIMEOUT, TimeUnit.SECONDS)
+            .readTimeout(AppConfig.TIMEOUT, TimeUnit.SECONDS)
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(client: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(AppConfig.BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideBooksApiService(retrofit: Retrofit): BooksApiService {
+        return retrofit.create(BooksApiService::class.java)
+    }
+}
+
+package com.example.nytimesbooksapp.data
+
+import com.example.nytimesbooksapp.data.local.repository.BookRepositoryImpl
+import com.example.nytimesbooksapp.domain.repository.BookRepository
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+@Module
+@InstallIn(SingletonComponent::class)
+
+
+abstract class RepositoryModule {
+
+
+    @Binds
+    @Singleton
+    abstract fun bindBooksRepository(
+        impl : BookRepositoryImpl
+    ) : BookRepository
+
+}
+package com.example.nytimesbooksapp.domain.model
+
+data class Book(
+    val title: String?,
+    val author: String?,
+    val description: String?,
+    val imageUrl: String?,
+    val publisher: String?,
+    val publishedDate: String?,
+    val primaryIsbn13:String?,
+    val rank: String?
+
+    )
+package com.example.nytimesbooksapp.domain.repository
+
+import com.example.nytimesbooksapp.data.local.roomdatabase.dao.BookDao
+import com.example.nytimesbooksapp.domain.model.Book
+import kotlinx.coroutines.flow.Flow
+
+interface BookRepository {
+    suspend fun getBooks( forceRefresh: Boolean = false): Flow<List<Book>>
+    suspend fun getCachedBooks(): List<Book>
+    suspend fun getBookByIsbn(isbn: String): Book?
+    suspend fun getBooksByDate(date:String): List<Book>
+
+
+
+}
+
+package com.example.nytimesbooksapp.domain.usecases
+
+import com.example.nytimesbooksapp.data.local.repository.BookRepositoryImpl
+import com.example.nytimesbooksapp.domain.model.Book
+import com.example.nytimesbooksapp.domain.repository.BookRepository
+import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
+//class GetBooksUseCase @Inject constructor(
+//    val repo: BookRepository
+//) {
+//
+//
+//    suspend operator fun invoke( forceRefresh: Boolean= true): Flow<List<Book>> {
+//        return repo.getBooks()
+//    }
+//
+//}
+class GetBooksUseCase @Inject constructor(private val repo: BookRepositoryImpl) {
+
+    suspend operator fun invoke(forceRefresh: Boolean) = repo.getBooks(forceRefresh)
+
+    suspend fun searchBooks(query: String) = repo.searchBooks(query)
+    suspend fun getCachedBooks() = repo.getCachedBooks()
+    suspend fun getBookByIsbn(isbn: String): Book? = repo.getBookByIsbn(isbn)
+    suspend fun getBooksByDate(date: String): List<Book> = repo.getBooksByDate(date)
+
+
+
+
+}
+
+package com.example.nytimesbooksapp.presentation.details
+
+import android.content.Intent
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
+import com.example.nytimesbooksapp.presentation.home.HomeUiState
+import com.example.nytimesbooksapp.presentation.viewmodel.BookViewModel
+import com.example.nytimesbooksapp.presentation.viewmodel.ThemeViewModel
+
+@OptIn(ExperimentalMaterial3Api::class)
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun BookDetailsScreen(
+    isbn: String,
+    navController: NavHostController,
+    themeViewModel: ThemeViewModel = hiltViewModel(),
+    viewModel: BookViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    val selectedBook by viewModel.selectedBook.collectAsState()
+
+    val isDarkTheme by themeViewModel.isDark.collectAsState()
+
+    LaunchedEffect(isbn) {
+        viewModel.getBookByIsbn(isbn)
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Book Details") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { themeViewModel.setTheme(!isDarkTheme) }) {
+                        Icon(
+                            imageVector = if (isDarkTheme)
+                                Icons.Default.LightMode else Icons.Default.DarkMode,
+                            contentDescription = "Toggle Theme"
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+
+            )
+        },
+        content = { paddingValues ->
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+            ) {
+                when {
+                    uiState is HomeUiState.Loading -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) { CircularProgressIndicator() }
+                    }
+
+                    uiState is HomeUiState.Error -> {
+                        val message = (uiState as HomeUiState.Error).message
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Error loading book details: $message",
+                                color = MaterialTheme.colorScheme.error,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                    }
+
+                    selectedBook != null -> {
+                        val book = selectedBook!!
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp)
+                                .verticalScroll(rememberScrollState())
+                        ) {
+                            Image(
+                                painter = rememberAsyncImagePainter(book.imageUrl),
+                                contentDescription = book.title,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(260.dp)
+                                    .padding(bottom = 16.dp, top = 30.dp)
+                                    .shadow(elevation = 30.dp, shape = RoundedCornerShape(20.dp))
+                            )
+
+                            Text(
+                                text = book.title ?: "Untitled",
+                                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
+                            )
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                text = "By ${book.author ?: "Unknown"}",
+                                style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray)
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = "Publisher: ${book.publisher ?: "N/A"}",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = "Rank: ${book.rank ?: "Unknown"}",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                            Spacer(Modifier.height(16.dp))
+
+                            Text(
+                                text = book.description ?: "No description available.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                lineHeight = MaterialTheme.typography.bodyMedium.lineHeight,
+                                color = Color.Blue
+                            )
+
+                            Spacer(Modifier.height(24.dp))
+
+                            val context = LocalContext.current
+                            Button(
+                                onClick = {
+                                    book.primaryIsbn13?.let {
+                                        val url = "https://www.amazon.com/s?k=$it"
+                                        val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                                        context.startActivity(intent)
+                                    }
+                                },
+                                modifier = Modifier.align(Alignment.CenterHorizontally)
+                            ) {
+                                Text("Buy Now")
+                            }
+                        }
+                    }
+
+                    else -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Book not found", color = MaterialTheme.colorScheme.onBackground)
+                        }
+                    }
+                }
+            }
+        }
+    )
+}
+package com.example.nytimesbooksapp.presentation.home
+import android.app.DatePickerDialog
+import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
+import com.example.nytimesbooksapp.R
+import com.example.nytimesbooksapp.domain.model.Book
+import com.example.nytimesbooksapp.presentation.navigation.NavRoutes
+import com.example.nytimesbooksapp.presentation.viewmodel.BookViewModel
+import com.example.nytimesbooksapp.presentation.viewmodel.ThemeViewModel
+import java.time.LocalDate
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
+
+
+
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeScreen(
+    navController: NavHostController,
+    viewModel: BookViewModel = hiltViewModel(),
+    themeViewModel: ThemeViewModel
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
+
+    val pullToRefreshState = rememberPullToRefreshState()
+
+    PullToRefreshBox(
+        modifier = Modifier.fillMaxSize(),
+        isRefreshing = isRefreshing,
+        onRefresh = { viewModel.loadBooks(forceRefresh = true, isInitial = false) },
+        state = pullToRefreshState,
+        contentAlignment = Alignment.Center
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            HomeTopBar()
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = viewModel::onSearch,
+                label = { Text("Search by title") },
+
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search"
+                    )
+                },
+
+                singleLine = true,
+
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Done
+                ),
+
+                keyboardActions = KeyboardActions(
+                    onDone = { }
+                ),
+
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                    cursorColor = MaterialTheme.colorScheme.primary
+                )
+            )
+
+
+            when (uiState) {
+                is HomeUiState.Loading -> LoadingView()
+                is HomeUiState.Error ->{
+                    val message = (uiState as HomeUiState.Error).message
+                if (message.contains("offline", ignoreCase = true)) OfflineView()
+                    else ErrorView((uiState as HomeUiState.Error).message) {
+                        viewModel.loadBooks(forceRefresh = true)
+                    }
+                }
+                is HomeUiState.Success -> {
+                    val books = (uiState as HomeUiState.Success).books
+                    if (books.isNotEmpty()) {
+                        BookList(
+                            books = books,
+                            isRefreshing = false,
+                            onRefresh = { viewModel.loadBooks(forceRefresh = true) },
+                            onBookClick = { isbn->
+                                navController.navigate(NavRoutes.Details.createRoute(isbn))
+                                          },
+
+                        )
+                    } else EmptyView()
+                }
+                HomeUiState.Empty -> EmptyView()
+            }
+        }
+
+        Text(
+            text = "Last sync: ${viewModel.lastSyncTime.collectAsState().value}",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.outline,
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(16.dp)
+        )
+
+        FloatingMenu(viewModel, themeViewModel)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeTopBar() {
+    TopAppBar(
+        title = {
+            Text(
+                "NYTimes Books",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.onPrimary
+        )
+    )
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun showDatePickerDialog(context: Context, onDateSelected: (String) -> Unit) {
+    val today = LocalDate.now()
+
+    val dialog = DatePickerDialog(
+        context,
+        { _, year, month, day ->
+            val formatted = "%04d-%02d-%02d".format(year, month + 1, day)
+            onDateSelected(formatted)
+        },
+        today.year,
+        today.monthValue - 1,
+        today.dayOfMonth
+    )
+    dialog.show()
+}
+
+
+
+@Composable
+fun EmptyView() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text("No Books Found", style = MaterialTheme.typography.bodyLarge)
+    }
+}
+
+//@Composable
+//fun LoadingView() {
+//    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+//        CircularProgressIndicator()
+//    }
+//}
+
+//@Composable
+//fun ErrorView(message: String, onRetry: ()-> Unit) {
+//    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+//
+//        Column(modifier = Modifier.fillMaxSize(),
+//            horizontalAlignment = Alignment.CenterHorizontally
+//            ) {
+//            Text(
+//                text = "Error: $message",
+//                color = MaterialTheme.colorScheme.error,
+//                style = MaterialTheme.typography.bodyLarge
+//            )
+//        }
+//        Spacer(modifier = Modifier.padding(8.dp))
+//        Button(onClick = onRetry) {
+//            Text("Retry")
+//        }
+//    }
+//}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BookList(
+    books: List<Book>,
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
+    onBookClick: (String)-> Unit,
+
+) {
+    val state = rememberPullToRefreshState()
+
+    PullToRefreshBox(
+        modifier = Modifier.fillMaxSize(),
+        isRefreshing = isRefreshing,
+        onRefresh = onRefresh,
+        state = state,
+        contentAlignment = Alignment.Center
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp)
+        ) {
+            items(books) { book ->
+                BookItem(book= book, onBookClick = onBookClick)//onBookClick } )
+            }
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun FloatingMenu(viewModel: BookViewModel, themeViewModel: ThemeViewModel) {
+    var menu by remember { mutableStateOf(false) }
+
+    val isDark by themeViewModel.isDark.collectAsState()
+
+    val infiniteTransition = rememberInfiniteTransition()
+    val animatedColor by infiniteTransition.animateColor(
+        initialValue = MaterialTheme.colorScheme.primary,
+        targetValue = MaterialTheme.colorScheme.secondary,
+        animationSpec = infiniteRepeatable(
+            animation = tween(500),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.BottomEnd
+    ) {
+        Column(
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            if (menu) {
+                val context = LocalContext.current
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(5.dp),
+                    modifier = Modifier.offset(x= 10.dp)
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        SmallFloatingActionButton(
+                            onClick = {
+                                viewModel.loadBooks(forceRefresh = true)
+                                menu = false
+                            },
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.img),
+                                contentDescription = "Sync Now",
+                                modifier = Modifier.size(20.dp),
+                                tint = Color.Unspecified
+                            )
+                        }
+                        Text(
+                            "Sync Now",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
+                        SmallFloatingActionButton(
+                            onClick = {
+
+                                themeViewModel.setTheme(!isDark)
+
+                                menu = false
+                            },
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.DarkMode,
+                                contentDescription = "Toggle Theme",
+                                modifier = Modifier.size(20.dp),
+                                tint = Color.Unspecified
+                            )
+                        }
+                        Text(
+                            "Theme",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        SmallFloatingActionButton(
+                            onClick = {
+
+                                showDatePickerDialog(context) { selectedDate ->
+                                    viewModel.pickDateAndLoad(selectedDate)
+                                }
+
+                                menu = false
+                            },
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.img_2),
+                                contentDescription = "Filter Date",
+                                modifier = Modifier.size(20.dp),
+                                tint = Color.Unspecified
+                            )
+                        }
+
+                        Text(
+                            "Select by Date",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                }
+            }
+
+            FloatingActionButton(
+                onClick = { menu = !menu },
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = if (menu) Icons.Default.Close else Icons.Default.Menu,
+                        contentDescription = "Menu"
+                    )
+                    AnimatedVisibility(visible = !menu) {
+                        Text(
+                            " Action ",
+                            color = animatedColor,
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun OfflineView(){
+
+    Box(modifier = Modifier.fillMaxSize() , contentAlignment = Alignment.Center) {
+        Column(modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally) {
+
+            Icon(painter = painterResource(id = R.drawable.img_1),
+                contentDescription = "wifi-Lost",
+                tint = Color.Gray,
+                modifier = Modifier.size(50.dp))
+        }
+        Text("You're Offline", style = MaterialTheme.typography.titleMedium)
+    }
+    Text("Showing Saved Books", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+
+}
+
+@Composable
+fun BookItem(book: Book, onBookClick: (String) -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp)
+            .clickable { book.primaryIsbn13?.let { onBookClick(it) } },
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Row(modifier = Modifier.padding(8.dp)) {
+            Image(
+                painter = rememberAsyncImagePainter(book.imageUrl),
+                contentDescription = book.title,
+                modifier = Modifier
+                    .size(90.dp)
+                    .padding(end = 8.dp)
+            )
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = book.title ?: "Untitled",
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = book.description ?: "",
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+            }
+        }
+    }
+}
+@Composable
+fun LoadingView() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.searching))
+        val progress by animateLottieCompositionAsState(
+            composition,
+            iterations = LottieConstants.IterateForever
+        )
+        LottieAnimation(
+            composition = composition,
+            progress = progress,
+            modifier = Modifier.size(150.dp)
+        )
+    }
+}
+
+@Composable
+fun ErrorView(message: String, onRetry: () -> Unit) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.cat))
+            val progress by animateLottieCompositionAsState(
+                composition,
+                iterations = LottieConstants.IterateForever
+            )
+            LottieAnimation(
+                composition = composition,
+                progress = progress,
+                modifier = Modifier.size(150.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Error: $message",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(onClick = onRetry) {
+                Text("Retry")
+            }
+        }
+    }
+}
+
+
+
+
+package com.example.nytimesbooksapp.presentation.home
+
+import com.example.nytimesbooksapp.domain.model.Book
+
+sealed class HomeUiState{
+    object Loading : HomeUiState()
+
+    data class Success(val books: List<Book>) : HomeUiState()
+    object Empty : HomeUiState()
+
+    data class Error(val message : String): HomeUiState()
+
+}
+package com.example.nytimesbooksapp.presentation.navigation
+
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.runtime.Composable
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.example.nytimesbooksapp.presentation.details.BookDetailsScreen
+import com.example.nytimesbooksapp.presentation.home.HomeScreen
+import com.example.nytimesbooksapp.presentation.splash.SplashScreen
+import com.example.nytimesbooksapp.presentation.viewmodel.ThemeViewModel
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun AppNavHost(navController: NavHostController, themeViewModel: ThemeViewModel)
+// |----------------------------------------------------------------------------------|
+// |    ↓                                                                             |
+// | AppNavHost defines which screens exist and how to move between them.             |
+// |                                                                                  |
+// |----------------------------------------------------------------------------------|
+{
+    NavHost(navController = navController,
+        startDestination = NavRoutes.Splash.route){
+
+        composable(NavRoutes.Splash.route) {
+            SplashScreen(navController)
+        }
+
+
+        composable(NavRoutes.Home.route) {
+            HomeScreen(navController = navController, themeViewModel = themeViewModel)
+        }
+
+//        composable(
+//            route = "book_details/{isbn}",
+//            arguments = listOf(navArgument("isbn"){type= NavType.StringType})
+//
+//        ) {
+//            backStackEntry ->
+//            val isbn = backStackEntry.arguments?.getString("isbn")?: return@composable
+//            BookDetailsScreen(isbn = isbn)
+//        }
+        composable(
+            route = "book_details/{isbn}",
+            arguments = listOf(
+                navArgument("isbn") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val isbn = backStackEntry.arguments?.getString("isbn") ?: ""
+            BookDetailsScreen(
+                isbn = isbn,
+                navController = navController,
+                themeViewModel = themeViewModel
+            )
+        }
+    }
+}
+package com.example.nytimesbooksapp.presentation.navigation
+
+sealed class NavRoutes (val route: String){
+// here we will now define three objects
+object Splash : NavRoutes("Splash_Screen")
+object Home : NavRoutes("Home_Screen")
+object Details : NavRoutes("book_details/{isbn}") {
+
+    // here we will now define the function
+    fun createRoute(isbn: String) = "book_details/$isbn"
+}
+
+}
+package com.example.nytimesbooksapp.presentation.splash
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import com.example.nytimesbooksapp.R
+import com.example.nytimesbooksapp.presentation.navigation.NavRoutes
+import kotlinx.coroutines.delay
+
+@Composable
+fun SplashScreen(navController: NavHostController) {
+
+    // 👇 rename from `visible` to `isVisible`
+    var isVisible by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        delay(2000L)
+        isVisible = false
+        delay(500L)
+        navController.navigate(NavRoutes.Home.route) {
+            popUpTo(NavRoutes.Splash.route) { inclusive = true }
+//            navController.popBackStack()
+        }
+    }
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        AnimatedVisibility(
+            visible = isVisible, //  now it references the Compose state
+            enter = fadeIn() + scaleIn(),
+            exit = fadeOut()
+        ) {
+            Image(
+                painter = painterResource(R.drawable.new_york_times),
+                contentDescription = "logo",
+                modifier = Modifier.size(150.dp)
+            )
+        }
+    }
+}
+
+package com.example.nytimesbooksapp.presentation.utils
+
+import android.Manifest
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import androidx.annotation.RequiresPermission
+
+object NetworkUtils {
+    @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)
+    fun isNetworkAvailable(context: Context): Boolean{
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork
+        val capabilities = connectivityManager.getNetworkCapabilities(network)
+        return capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+    }
+}
+package com.example.nytimesbooksapp.presentation.viewmodel
+
+import android.app.Application
+import android.net.wifi.hotspot2.pps.HomeSp
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.nytimesbooksapp.data.local.datastore.UserPreferencesDataStore
+import com.example.nytimesbooksapp.data.local.repository.BookRepositoryImpl
+import com.example.nytimesbooksapp.domain.model.Book
+import com.example.nytimesbooksapp.domain.repository.BookRepository
+import com.example.nytimesbooksapp.domain.usecases.GetBooksUseCase
+import com.example.nytimesbooksapp.presentation.home.HomeUiState
+import com.example.nytimesbooksapp.presentation.utils.NetworkUtils
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
+import java.time.Instant
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+
+@RequiresApi(Build.VERSION_CODES.O)
+@HiltViewModel
+class BookViewModel @Inject constructor(
+    private val getBooksUseCase: GetBooksUseCase,
+    private val prefs : UserPreferencesDataStore,
+    private val repo : BookRepositoryImpl,
+    application: Application
+) : AndroidViewModel(application){ // ViewModel() {
+
+    private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+    private val _selectedBook = MutableStateFlow<Book?>(null)
+    val selectedBook: StateFlow<Book?> = _selectedBook
+
+    private var allBooks: List<Book> = emptyList()
+    private var isInitialLoadDone = false
+
+    private val _lastSyncTime = MutableStateFlow<String>("never")
+    val  lastSyncTime = _lastSyncTime.asStateFlow()
+
+    private val _selectedDate = MutableStateFlow("")
+            val selectedDate : StateFlow<String> = _selectedDate.asStateFlow()
+
+
+    init {
+        viewModelScope.launch {
+
+            prefs.lastSyncTime.collect { lastSync ->
+                val now = System.currentTimeMillis()
+                val hoursSinceSync = TimeUnit.MILLISECONDS.toHours(now - lastSync)
+
+                _lastSyncTime.value = if (lastSync == 0L) {
+                    "Never"
+                } else {
+                    val formatter = java.text.SimpleDateFormat("hh:mm a, dd MMM", java.util.Locale.getDefault())
+                    formatter.format(java.util.Date(lastSync))
+                }
+
+                if (lastSync == 0L || hoursSinceSync >= 24) {
+                    loadBooks(forceRefresh = true, isInitial = false)
+                    prefs.updateLastSyncTime(now)
+                    _lastSyncTime.value = java.text.SimpleDateFormat("hh:mm a, dd MMM", java.util.Locale.getDefault())
+                        .format(java.util.Date(now))
+                } else {
+                    loadBooks(forceRefresh = false, isInitial = false)
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            prefs.selectedDate.collect { date ->
+                if (date.isNotBlank())
+                {
+                    _selectedDate.value = date
+                    loadBooksByDate(date)
+                }
+            }
+        }
+    }
+
+
+
+
+
+    fun loadBooks(forceRefresh: Boolean = false, isInitial: Boolean = false) {
+        viewModelScope.launch @androidx.annotation.RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) {
+            val context = getApplication<Application>().applicationContext
+            val isOnline = NetworkUtils.isNetworkAvailable(context)
+            if (!isOnline){
+                val cached = getBooksUseCase.getCachedBooks()
+                if (cached.isEmpty()){
+                    _uiState.value= HomeUiState.Error("You're Offline. No cached Data is Available")
+                }
+                else
+                {
+                    _uiState.value = HomeUiState.Success(cached)
+                }
+                return@launch
+
+            }
+            getBooksUseCase(forceRefresh)
+                .onStart {
+                    if (isInitial){
+                        _isRefreshing.value = true
+                    _uiState.value = HomeUiState.Loading
+                }
+                    else
+                    {
+                        _uiState.value = HomeUiState.Loading
+                    }
+                }
+                .catch { e ->
+                    _isRefreshing.value = false
+                    _uiState.value = HomeUiState.Error(
+                        e.localizedMessage ?: "Unexpected error occurred"
+                    )
+                }
+                .collect { books ->
+                    delay(2000L)
+                    _isRefreshing.value = false
+                    allBooks = books
+                    _uiState.value = when {books.isEmpty() ->HomeUiState.Empty
+                     else -> HomeUiState.Success(books)
+                    }
+                    if (forceRefresh){
+                        val currentTimeMillis = System.currentTimeMillis()
+                        prefs.updateLastSyncTime(currentTimeMillis)
+                    }
+
+                    isInitialLoadDone = true
+
+                }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun shouldAutoSync(lastSync: String?): Boolean {
+        if (lastSync == null) return true
+        return try {
+            val last = Instant.parse(lastSync)
+            val diffMinutes = java.time.Duration.between(last, Instant.now()).toMinutes()
+            diffMinutes > 60 // auto-sync every 60 mints
+        } catch (e: Exception) {
+            true
+        }
+    }
+
+    fun handleIntent(intent: HomeIntent) {
+        when (intent) {
+            is HomeIntent.Search -> {
+                onSearch(intent.query)
+            }
+            HomeIntent.Refresh -> {
+                loadBooks(forceRefresh = true)
+            }
+            is HomeIntent.LoadByDate -> {
+                pickDateAndLoad(intent.date)
+            }
+            is HomeIntent.OpenBook -> {
+                getBookByIsbn(intent.isbn)
+            }
+        }
+    }
+
+fun onSearch(query: String) {
+    _searchQuery.value = query
+    viewModelScope.launch {
+        _uiState.value = HomeUiState.Loading
+        try {
+            val results = getBooksUseCase.searchBooks(query) // new repo function
+            _uiState.value = if (results.isEmpty()) HomeUiState.Empty
+            else HomeUiState.Success(results)
+        } catch (e: Exception) {
+            _uiState.value = HomeUiState.Error(e.localizedMessage ?: "Unexpected error")
+        }
+    }
+
+}
+
+    fun getBookByIsbn(isbn: String) {
+        viewModelScope.launch { _uiState.value = HomeUiState.Loading
+
+            try {
+                val book = getBooksUseCase.getBookByIsbn(isbn)
+
+                if (book != null)
+                {
+                    _selectedBook.value = book
+                    _uiState.value = HomeUiState.Success(listOf(book))
+                }
+                else
+                {
+                    _uiState.value = HomeUiState.Error("Book Not Found")
+                }
+            }catch (e: Exception)
+            {
+                _uiState.value = HomeUiState.Error(e.localizedMessage?:"Error Loading Books")
+            }
+        }
+    }
+fun pickDateAndLoad(date: String) {
+    viewModelScope.launch {
+        _uiState.value = HomeUiState.Loading
+        val result = repo.getBooksByDate(date)
+        _uiState.value = if (result.isEmpty()) {
+            HomeUiState.Error("No books found for $date")
+        } else {
+            HomeUiState.Success(result)
+        }
+    }
+}
+
+
+    fun loadBooksByDate(date: String){
+        viewModelScope.launch { _uiState.value = HomeUiState.Loading
+        try {
+                    val  books = getBooksUseCase.getBooksByDate(date)
+            _uiState.value = if (books.isEmpty()) HomeUiState.Error("No books Found For $date")
+            else HomeUiState.Success(books)
+        }
+        catch (e: Exception)
+        {
+                    _uiState.value  = HomeUiState.Error(e.localizedMessage?: "Error Fetching Books For $date ")
+
+        }
+
+        }
+    }
+
+}
+package com.example.nytimesbooksapp.presentation.viewmodel
+sealed class HomeIntent {
+    data class Search(val query: String) : HomeIntent()
+    object Refresh : HomeIntent()
+    data class LoadByDate(val date: String) : HomeIntent()
+    data class OpenBook(val isbn: String) : HomeIntent()
+}
+package com.example.nytimesbooksapp.presentation.viewmodel
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.nytimesbooksapp.data.local.datastore.UserPreferencesDataStore
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+
+@HiltViewModel
+class ThemeViewModel @Inject constructor(
+    private val prefs: UserPreferencesDataStore
+) : ViewModel() {
+
+    val isDark = prefs.isDarkMode.stateIn(
+        viewModelScope,
+        SharingStarted.Lazily,
+        false
+    )
+
+    fun setTheme(isDark: Boolean) {
+        viewModelScope.launch {
+            prefs.setTheme(isDark)
+        }
+    }
+}
+
+
+
+
+

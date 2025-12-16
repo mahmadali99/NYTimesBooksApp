@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+<!--    <style name="Theme.MySplashScreen" parent="Theme.SplashScreen" >-->
+<!--    <item name="windowSplashScreenBackground">@color/white</item> // splashScreen Background Color-->
+<!--    <item name="windowSplashScreenAnimatedIcon">@drawable/new_york_times</item>-->
+<!--    <item name="postSplashScreenTheme">@style/Theme.NYTimesBooksApp</item>-->
+<!--&lt;!&ndash;    <item name="windowSplashScreenAnimatedIcon">@drawable/transparent_pixel</item> &lt;!&ndash; transparent 1x1 image &ndash;&gt;&ndash;&gt;-->
+
+<!--    </style>-->
+
+    <style name="Theme.NYTimesBooksApp" parent="android:Theme.Material.Light.NoActionBar.TranslucentDecor"/>
+
+
+</resources>

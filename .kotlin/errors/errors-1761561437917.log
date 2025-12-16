@@ -1,0 +1,487 @@
+kotlin version: 2.0.21
+error message: org.jetbrains.kotlin.backend.common.BackendException: Backend Internal error: Exception during IR lowering
+File being compiled: C:/Users/ahmad.riaz/AndroidStudioProjects/NYTimesBooksApp/app/src/main/java/com/example/nytimesbooksapp/presentation/splash/SplashScreen.kt
+The root cause java.lang.RuntimeException was thrown at: org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.generate(FunctionCodegen.kt:47)
+	at org.jetbrains.kotlin.backend.common.CodegenUtil.reportBackendException(CodegenUtil.kt:253)
+	at org.jetbrains.kotlin.backend.common.CodegenUtil.reportBackendException$default(CodegenUtil.kt:236)
+	at org.jetbrains.kotlin.backend.common.phaser.PerformByIrFilePhase.invokeSequential(performByIrFile.kt:65)
+	at org.jetbrains.kotlin.backend.common.phaser.PerformByIrFilePhase.invoke(performByIrFile.kt:52)
+	at org.jetbrains.kotlin.backend.common.phaser.PerformByIrFilePhase.invoke(performByIrFile.kt:38)
+	at org.jetbrains.kotlin.backend.common.phaser.NamedCompilerPhase.phaseBody(CompilerPhase.kt:166)
+	at org.jetbrains.kotlin.backend.common.phaser.AbstractNamedCompilerPhase.invoke(CompilerPhase.kt:113)
+	at org.jetbrains.kotlin.backend.common.phaser.CompositePhase.invoke(PhaseBuilders.kt:27)
+	at org.jetbrains.kotlin.backend.common.phaser.CompositePhase.invoke(PhaseBuilders.kt:14)
+	at org.jetbrains.kotlin.backend.common.phaser.NamedCompilerPhase.phaseBody(CompilerPhase.kt:166)
+	at org.jetbrains.kotlin.backend.common.phaser.AbstractNamedCompilerPhase.invoke(CompilerPhase.kt:113)
+	at org.jetbrains.kotlin.backend.common.phaser.CompilerPhaseKt.invokeToplevel(CompilerPhase.kt:62)
+	at org.jetbrains.kotlin.backend.jvm.JvmIrCodegenFactory.invokeCodegen(JvmIrCodegenFactory.kt:371)
+	at org.jetbrains.kotlin.codegen.CodegenFactory.generateModule(CodegenFactory.kt:47)
+	at org.jetbrains.kotlin.backend.jvm.JvmIrCodegenFactory.generateModuleInFrontendIRMode(JvmIrCodegenFactory.kt:433)
+	at org.jetbrains.kotlin.cli.jvm.compiler.pipeline.JvmCompilerPipelineKt.generateCodeFromIr(jvmCompilerPipeline.kt:246)
+	at org.jetbrains.kotlin.cli.jvm.compiler.pipeline.JvmCompilerPipelineKt.compileModulesUsingFrontendIrAndLightTree(jvmCompilerPipeline.kt:142)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecute(K2JVMCompiler.kt:148)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecute(K2JVMCompiler.kt:43)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.execImpl(CLICompiler.kt:103)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.execImpl(CLICompiler.kt:49)
+	at org.jetbrains.kotlin.cli.common.CLITool.exec(CLITool.kt:101)
+	at org.jetbrains.kotlin.incremental.IncrementalJvmCompilerRunner.runCompiler(IncrementalJvmCompilerRunner.kt:464)
+	at org.jetbrains.kotlin.incremental.IncrementalJvmCompilerRunner.runCompiler(IncrementalJvmCompilerRunner.kt:73)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.doCompile(IncrementalCompilerRunner.kt:506)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compileImpl(IncrementalCompilerRunner.kt:423)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.tryCompileIncrementally$lambda$9$compile(IncrementalCompilerRunner.kt:249)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.tryCompileIncrementally(IncrementalCompilerRunner.kt:267)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compile(IncrementalCompilerRunner.kt:120)
+	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.execIncrementalCompiler(CompileServiceImpl.kt:675)
+	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.access$execIncrementalCompiler(CompileServiceImpl.kt:92)
+	at org.jetbrains.kotlin.daemon.CompileServiceImpl.compile(CompileServiceImpl.kt:1660)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
+	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+	at java.rmi/sun.rmi.server.UnicastServerRef.dispatch(Unknown Source)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Unknown Source)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.rmi/sun.rmi.transport.Transport.serviceCall(Unknown Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport.handleMessages(Unknown Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run0(Unknown Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.lambda$run$0(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run(Unknown Source)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at java.base/java.lang.Thread.run(Unknown Source)
+Caused by: java.lang.RuntimeException: Exception while generating code for:
+FUN name:SplashScreen visibility:public modality:FINAL <> (navController:androidx.navigation.NavHostController, $composer:androidx.compose.runtime.Composer?, $changed:kotlin.Int) returnType:kotlin.Unit
+  annotations:
+    Composable
+    ComposableTarget(applier = "androidx.compose.ui.UiComposable")
+  VALUE_PARAMETER name:navController index:0 type:androidx.navigation.NavHostController
+  VALUE_PARAMETER name:$composer index:1 type:androidx.compose.runtime.Composer? [assignable]
+  VALUE_PARAMETER name:$changed index:2 type:kotlin.Int
+  BLOCK_BODY
+    BLOCK type=kotlin.Unit origin=null
+      SET_VAR '$composer: androidx.compose.runtime.Composer? [assignable] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=kotlin.Unit origin=null
+        CALL 'public abstract fun startRestartGroup (key: kotlin.Int): androidx.compose.runtime.Composer declared in androidx.compose.runtime.Composer' type=androidx.compose.runtime.Composer origin=null
+          $this: GET_VAR '$composer: androidx.compose.runtime.Composer? [assignable] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.compose.runtime.Composer? origin=null
+          key: CONST Int type=kotlin.Int value=792599223
+      CALL 'public final fun sourceInformation (composer: androidx.compose.runtime.Composer, sourceInformation: kotlin.String): kotlin.Unit declared in androidx.compose.runtime.ComposerKt' type=kotlin.Unit origin=null
+        composer: GET_VAR '$composer: androidx.compose.runtime.Composer? [assignable] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.compose.runtime.Composer? origin=null
+        sourceInformation: CONST String type=kotlin.String value="C(SplashScreen)30@1222L32,32@1324L244,32@1303L265,41@1573L467:SplashScreen.kt#fwd2qa"
+    VAR name:$dirty type:kotlin.Int [val]
+      GET_VAR '$changed: kotlin.Int declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=kotlin.Int origin=null
+    WHEN type=kotlin.Unit origin=IF
+      BRANCH
+        if: CALL 'public final fun EQEQ (arg0: kotlin.Any?, arg1: kotlin.Any?): kotlin.Boolean declared in kotlin.internal.ir' type=kotlin.Boolean origin=null
+          arg0: CALL 'public final fun and (other: kotlin.Int): kotlin.Int [infix] declared in kotlin.Int' type=kotlin.Int origin=null
+            $this: GET_VAR '$changed: kotlin.Int declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=kotlin.Int origin=null
+            other: CONST Int type=kotlin.Int value=6
+          arg1: CONST Int type=kotlin.Int value=0
+        then: SET_VAR 'val $dirty: kotlin.Int [val] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=kotlin.Unit origin=null
+          CALL 'public final fun or (other: kotlin.Int): kotlin.Int [infix] declared in kotlin.Int' type=kotlin.Int origin=null
+            $this: GET_VAR 'val $dirty: kotlin.Int [val] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=kotlin.Int origin=null
+            other: WHEN type=kotlin.Int origin=IF
+              BRANCH
+                if: CALL 'public open fun changedInstance (value: kotlin.Any?): kotlin.Boolean declared in androidx.compose.runtime.Composer' type=kotlin.Boolean origin=null
+                  $this: GET_VAR '$composer: androidx.compose.runtime.Composer? [assignable] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.compose.runtime.Composer? origin=null
+                  value: GET_VAR 'navController: androidx.navigation.NavHostController declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.navigation.NavHostController origin=null
+                then: CONST Int type=kotlin.Int value=4
+              BRANCH
+                if: CONST Boolean type=kotlin.Boolean value=true
+                then: CONST Int type=kotlin.Int value=2
+    WHEN type=kotlin.Unit origin=IF
+      BRANCH
+        if: CALL 'public final fun OROR (arg0: kotlin.Boolean, arg1: kotlin.Boolean): kotlin.Boolean declared in kotlin.internal.ir' type=kotlin.Boolean origin=null
+          arg0: CALL 'public final fun not (): kotlin.Boolean [operator] declared in kotlin.Boolean' type=kotlin.Boolean origin=null
+            $this: CALL 'public final fun EQEQ (arg0: kotlin.Any?, arg1: kotlin.Any?): kotlin.Boolean declared in kotlin.internal.ir' type=kotlin.Boolean origin=null
+              arg0: CALL 'public final fun and (other: kotlin.Int): kotlin.Int [infix] declared in kotlin.Int' type=kotlin.Int origin=null
+                $this: GET_VAR 'val $dirty: kotlin.Int [val] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=kotlin.Int origin=null
+                other: CONST Int type=kotlin.Int value=3
+              arg1: CONST Int type=kotlin.Int value=2
+          arg1: CALL 'public final fun not (): kotlin.Boolean [operator] declared in kotlin.Boolean' type=kotlin.Boolean origin=null
+            $this: CALL 'public abstract fun <get-skipping> (): kotlin.Boolean declared in androidx.compose.runtime.Composer' type=kotlin.Boolean origin=null
+              $this: GET_VAR '$composer: androidx.compose.runtime.Composer? [assignable] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.compose.runtime.Composer? origin=null
+        then: BLOCK type=kotlin.Unit origin=null
+          WHEN type=kotlin.Unit origin=IF
+            BRANCH
+              if: CALL 'public final fun isTraceInProgress (): kotlin.Boolean declared in androidx.compose.runtime.ComposerKt' type=kotlin.Boolean origin=null
+              then: CALL 'public final fun traceEventStart (key: kotlin.Int, dirty1: kotlin.Int, dirty2: kotlin.Int, info: kotlin.String): kotlin.Unit declared in androidx.compose.runtime.ComposerKt' type=kotlin.Unit origin=null
+                key: CONST Int type=kotlin.Int value=792599223
+                dirty1: GET_VAR 'val $dirty: kotlin.Int [val] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=kotlin.Int origin=null
+                dirty2: CONST Int type=kotlin.Int value=-1
+                info: CONST String type=kotlin.String value="com.example.nytimesbooksapp.presentation.splash.SplashScreen (SplashScreen.kt:29)"
+          VAR PROPERTY_DELEGATE name:visibility$delegate type:androidx.compose.runtime.MutableState<kotlin.Boolean> [val]
+            BLOCK type=androidx.compose.runtime.MutableState<kotlin.Boolean> origin=null
+              BLOCK type=kotlin.Unit origin=null
+                CALL 'public abstract fun startReplaceGroup (key: kotlin.Int): kotlin.Unit declared in androidx.compose.runtime.Composer' type=kotlin.Unit origin=null
+                  $this: GET_VAR '$composer: androidx.compose.runtime.Composer? [assignable] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.compose.runtime.Composer? origin=null
+                  key: CONST Int type=kotlin.Int value=-1014899981
+                CALL 'public final fun sourceInformation (composer: androidx.compose.runtime.Composer, sourceInformation: kotlin.String): kotlin.Unit declared in androidx.compose.runtime.ComposerKt' type=kotlin.Unit origin=null
+                  composer: GET_VAR '$composer: androidx.compose.runtime.Composer? [assignable] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.compose.runtime.Composer? origin=null
+                  sourceInformation: CONST String type=kotlin.String value="CC(remember):SplashScreen.kt#9igjgp"
+              VAR IR_TEMPORARY_VARIABLE name:tmp0_group type:androidx.compose.runtime.MutableState<kotlin.Boolean> [val]
+                CALL 'public final fun cache <T> (invalid: kotlin.Boolean, block: @[DisallowComposableCalls] kotlin.Function0<T of androidx.compose.runtime.ComposerKt.cache>): T of androidx.compose.runtime.ComposerKt.cache [inline] declared in androidx.compose.runtime.ComposerKt' type=androidx.compose.runtime.MutableState<kotlin.Boolean> origin=null
+                  <T>: androidx.compose.runtime.MutableState<kotlin.Boolean>
+                  $receiver: GET_VAR '$composer: androidx.compose.runtime.Composer? [assignable] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.compose.runtime.Composer? origin=null
+                  invalid: CONST Boolean type=kotlin.Boolean value=false
+                  block: BLOCK type=kotlin.Function0<androidx.compose.runtime.MutableState<kotlin.Boolean>> origin=LAMBDA
+                    COMPOSITE type=kotlin.Unit origin=null
+                    FUNCTION_REFERENCE 'private final fun SplashScreen$lambda$0 (): androidx.compose.runtime.MutableState<kotlin.Boolean> declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt' type=kotlin.Function0<androidx.compose.runtime.MutableState<kotlin.Boolean>> origin=INLINE_LAMBDA reflectionTarget=null
+              CALL 'public abstract fun endReplaceGroup (): kotlin.Unit declared in androidx.compose.runtime.Composer' type=kotlin.Unit origin=null
+                $this: GET_VAR '$composer: androidx.compose.runtime.Composer? [assignable] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.compose.runtime.Composer? origin=null
+              GET_VAR 'val tmp0_group: androidx.compose.runtime.MutableState<kotlin.Boolean> [val] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.compose.runtime.MutableState<kotlin.Boolean> origin=null
+          CALL 'public final fun LaunchedEffect (key1: kotlin.Any?, block: @[ExtensionFunctionType] kotlin.coroutines.SuspendFunction1<kotlinx.coroutines.CoroutineScope, kotlin.Unit>, $composer: androidx.compose.runtime.Composer?, $changed: kotlin.Int): kotlin.Unit declared in androidx.compose.runtime.EffectsKt' type=kotlin.Unit origin=null
+            key1: GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:kotlin.Unit visibility:public [final,static] declared in kotlin.Unit' type=kotlin.Unit origin=null
+            block: BLOCK type=@[ExtensionFunctionType] kotlin.coroutines.SuspendFunction1<kotlinx.coroutines.CoroutineScope, kotlin.Unit> origin=null
+              BLOCK type=kotlin.Unit origin=null
+                CALL 'public abstract fun startReplaceGroup (key: kotlin.Int): kotlin.Unit declared in androidx.compose.runtime.Composer' type=kotlin.Unit origin=null
+                  $this: GET_VAR '$composer: androidx.compose.runtime.Composer? [assignable] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.compose.runtime.Composer? origin=null
+                  key: CONST Int type=kotlin.Int value=-1014896505
+                CALL 'public final fun sourceInformation (composer: androidx.compose.runtime.Composer, sourceInformation: kotlin.String): kotlin.Unit declared in androidx.compose.runtime.ComposerKt' type=kotlin.Unit origin=null
+                  composer: GET_VAR '$composer: androidx.compose.runtime.Composer? [assignable] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.compose.runtime.Composer? origin=null
+                  sourceInformation: CONST String type=kotlin.String value="CC(remember):SplashScreen.kt#9igjgp"
+              VAR IR_TEMPORARY_VARIABLE name:tmp1_group type:@[ExtensionFunctionType] kotlin.coroutines.SuspendFunction1<kotlinx.coroutines.CoroutineScope, kotlin.Unit> [val]
+                CALL 'public final fun cache <T> (invalid: kotlin.Boolean, block: @[DisallowComposableCalls] kotlin.Function0<T of androidx.compose.runtime.ComposerKt.cache>): T of androidx.compose.runtime.ComposerKt.cache [inline] declared in androidx.compose.runtime.ComposerKt' type=@[ExtensionFunctionType] kotlin.coroutines.SuspendFunction1<kotlinx.coroutines.CoroutineScope, kotlin.Unit> origin=null
+                  <T>: @[ExtensionFunctionType] kotlin.coroutines.SuspendFunction1<kotlinx.coroutines.CoroutineScope, kotlin.Unit>
+                  $receiver: GET_VAR '$composer: androidx.compose.runtime.Composer? [assignable] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.compose.runtime.Composer? origin=null
+                  invalid: CALL 'public open fun changedInstance (value: kotlin.Any?): kotlin.Boolean declared in androidx.compose.runtime.Composer' type=kotlin.Boolean origin=null
+                    $this: GET_VAR '$composer: androidx.compose.runtime.Composer? [assignable] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.compose.runtime.Composer? origin=null
+                    value: GET_VAR 'navController: androidx.navigation.NavHostController declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.navigation.NavHostController origin=null
+                  block: BLOCK type=kotlin.Function0<@[ExtensionFunctionType] kotlin.coroutines.SuspendFunction1<kotlinx.coroutines.CoroutineScope, kotlin.Unit>> origin=LAMBDA
+                    COMPOSITE type=kotlin.Unit origin=null
+                    FUNCTION_REFERENCE 'private final fun SplashScreen$lambda$2 ($navController: androidx.navigation.NavHostController): @[ExtensionFunctionType] kotlin.coroutines.SuspendFunction1<kotlinx.coroutines.CoroutineScope, kotlin.Unit> declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt' type=kotlin.Function0<@[ExtensionFunctionType] kotlin.coroutines.SuspendFunction1<kotlinx.coroutines.CoroutineScope, kotlin.Unit>> origin=INLINE_LAMBDA reflectionTarget=null
+                      $navController: GET_VAR 'navController: androidx.navigation.NavHostController declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.navigation.NavHostController origin=null
+              CALL 'public abstract fun endReplaceGroup (): kotlin.Unit declared in androidx.compose.runtime.Composer' type=kotlin.Unit origin=null
+                $this: GET_VAR '$composer: androidx.compose.runtime.Composer? [assignable] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.compose.runtime.Composer? origin=null
+              GET_VAR 'val tmp1_group: @[ExtensionFunctionType] kotlin.coroutines.SuspendFunction1<kotlinx.coroutines.CoroutineScope, kotlin.Unit> [val] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=@[ExtensionFunctionType] kotlin.coroutines.SuspendFunction1<kotlinx.coroutines.CoroutineScope, kotlin.Unit> origin=null
+            $composer: GET_VAR '$composer: androidx.compose.runtime.Composer? [assignable] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.compose.runtime.Composer? origin=null
+            $changed: CONST Int type=kotlin.Int value=6
+          CALL 'public final fun Box (modifier: androidx.compose.ui.Modifier?, contentAlignment: androidx.compose.ui.Alignment?, propagateMinConstraints: kotlin.Boolean, content: @[ExtensionFunctionType] kotlin.Function3<androidx.compose.foundation.layout.BoxScope, androidx.compose.runtime.Composer, kotlin.Int, kotlin.Unit>, $composer: androidx.compose.runtime.Composer?, $changed: kotlin.Int, $default: kotlin.Int): kotlin.Unit [inline] declared in androidx.compose.foundation.layout.BoxKt' type=kotlin.Unit origin=null
+            modifier: CALL 'public final fun fillMaxSize$default (fraction: kotlin.Float, $mask0: kotlin.Int, $handler: kotlin.Any?): androidx.compose.ui.Modifier declared in androidx.compose.foundation.layout.SizeKt' type=androidx.compose.ui.Modifier origin=DEFAULT_DISPATCH_CALL
+              $receiver: GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:Companion type:androidx.compose.ui.Modifier.Companion visibility:public [final,static] declared in androidx.compose.ui.Modifier' type=androidx.compose.ui.Modifier.Companion origin=null
+              fraction: COMPOSITE type=kotlin.Float origin=DEFAULT_VALUE
+                CONST Float type=kotlin.Float value=0.0
+              $mask0: CONST Int type=kotlin.Int value=1
+              $handler: CONST Null type=kotlin.Any? value=null
+            contentAlignment: CALL 'public final fun <get-Center> (): androidx.compose.ui.Alignment declared in androidx.compose.ui.Alignment.Companion' type=androidx.compose.ui.Alignment origin=GET_PROPERTY
+              $this: GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:Companion type:androidx.compose.ui.Alignment.Companion visibility:public [final,static] declared in androidx.compose.ui.Alignment' type=androidx.compose.ui.Alignment.Companion origin=null
+            propagateMinConstraints: COMPOSITE type=kotlin.Boolean origin=DEFAULT_VALUE
+              CONST Boolean type=kotlin.Boolean value=false
+            content: BLOCK type=@[ExtensionFunctionType] kotlin.Function3<androidx.compose.foundation.layout.BoxScope, androidx.compose.runtime.Composer, kotlin.Int, kotlin.Unit> origin=LAMBDA
+              COMPOSITE type=kotlin.Unit origin=null
+              FUNCTION_REFERENCE 'private final fun SplashScreen$lambda$3 ($composer: androidx.compose.runtime.Composer?, $changed: kotlin.Int): kotlin.Unit declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt' type=@[ExtensionFunctionType] kotlin.Function3<androidx.compose.foundation.layout.BoxScope, androidx.compose.runtime.Composer, kotlin.Int, kotlin.Unit> origin=INLINE_LAMBDA reflectionTarget=null
+            $composer: GET_VAR '$composer: androidx.compose.runtime.Composer? [assignable] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.compose.runtime.Composer? origin=null
+            $changed: CONST Int type=kotlin.Int value=54
+            $default: CONST Int type=kotlin.Int value=4
+          WHEN type=kotlin.Unit origin=IF
+            BRANCH
+              if: CALL 'public final fun isTraceInProgress (): kotlin.Boolean declared in androidx.compose.runtime.ComposerKt' type=kotlin.Boolean origin=null
+              then: CALL 'public final fun traceEventEnd (): kotlin.Unit declared in androidx.compose.runtime.ComposerKt' type=kotlin.Unit origin=null
+      BRANCH
+        if: CONST Boolean type=kotlin.Boolean value=true
+        then: CALL 'public abstract fun skipToGroupEnd (): kotlin.Unit declared in androidx.compose.runtime.Composer' type=kotlin.Unit origin=null
+          $this: GET_VAR '$composer: androidx.compose.runtime.Composer? [assignable] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.compose.runtime.Composer? origin=null
+    BLOCK type=kotlin.Unit origin=null
+      BLOCK type=kotlin.Unit origin=FOLDED_SAFE_CALL
+        WHEN type=kotlin.Unit origin=FOLDED_SAFE_CALL
+          BRANCH
+            if: COMPOSITE type=kotlin.Boolean origin=null
+              VAR IR_TEMPORARY_VARIABLE name:tmp2_safe_receiver type:androidx.compose.runtime.ScopeUpdateScope? [val]
+                CALL 'public abstract fun endRestartGroup (): androidx.compose.runtime.ScopeUpdateScope? declared in androidx.compose.runtime.Composer' type=androidx.compose.runtime.ScopeUpdateScope? origin=null
+                  $this: GET_VAR '$composer: androidx.compose.runtime.Composer? [assignable] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.compose.runtime.Composer? origin=null
+              CALL 'public final fun not (): kotlin.Boolean [operator] declared in kotlin.Boolean' type=kotlin.Boolean origin=null
+                $this: CALL 'public final fun EQEQ (arg0: kotlin.Any?, arg1: kotlin.Any?): kotlin.Boolean declared in kotlin.internal.ir' type=kotlin.Boolean origin=null
+                  arg0: GET_VAR 'val tmp2_safe_receiver: androidx.compose.runtime.ScopeUpdateScope? [val] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.compose.runtime.ScopeUpdateScope? origin=null
+                  arg1: CONST Null type=kotlin.Nothing? value=null
+            then: CALL 'public abstract fun updateScope (block: kotlin.Function2<androidx.compose.runtime.Composer, kotlin.Int, kotlin.Unit>): kotlin.Unit declared in androidx.compose.runtime.ScopeUpdateScope' type=kotlin.Unit origin=null
+              $this: GET_VAR 'val tmp2_safe_receiver: androidx.compose.runtime.ScopeUpdateScope? [val] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.compose.runtime.ScopeUpdateScope? origin=null
+              block: BLOCK type=kotlin.Function2<androidx.compose.runtime.Composer?, kotlin.Int, kotlin.Unit> origin=LAMBDA
+                COMPOSITE type=kotlin.Unit origin=null
+                CALL 'public final fun <jvm-indy> <T> (dynamicCall: T of kotlin.jvm.internal.<jvm-indy>, bootstrapMethodHandle: kotlin.Any, vararg bootstrapMethodArguments: kotlin.Any): T of kotlin.jvm.internal.<jvm-indy> declared in kotlin.jvm.internal' type=kotlin.Function2<androidx.compose.runtime.Composer?, kotlin.Int, kotlin.Unit> origin=null
+                  <T>: kotlin.Function2<androidx.compose.runtime.Composer?, kotlin.Int, kotlin.Unit>
+                  dynamicCall: CALL 'public final fun invoke (p0: androidx.navigation.NavHostController, p1: kotlin.Int): kotlin.Function2<androidx.compose.runtime.Composer?, kotlin.Int, kotlin.Unit> declared in kotlin.jvm.internal.invokeDynamic' type=kotlin.Function2<androidx.compose.runtime.Composer?, kotlin.Int, kotlin.Unit> origin=null
+                    p0: GET_VAR 'navController: androidx.navigation.NavHostController declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=androidx.navigation.NavHostController origin=null
+                    p1: GET_VAR '$changed: kotlin.Int declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen' type=kotlin.Int origin=null
+                  bootstrapMethodHandle: CALL 'public final fun <jvm-method-handle> (tag: kotlin.Int, owner: kotlin.String, name: kotlin.String, descriptor: kotlin.String, isInterface: kotlin.Boolean): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+                    tag: CONST Int type=kotlin.Int value=6
+                    owner: CONST String type=kotlin.String value="java/lang/invoke/LambdaMetafactory"
+                    name: CONST String type=kotlin.String value="metafactory"
+                    descriptor: CONST String type=kotlin.String value="(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;"
+                    isInterface: CONST Boolean type=kotlin.Boolean value=false
+                  bootstrapMethodArguments: VARARG type=kotlin.Array<kotlin.Any> varargElementType=kotlin.Any
+                    CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+                      method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (p1: P1 of kotlin.Function2, p2: P2 of kotlin.Function2): R of kotlin.Function2 [operator] declared in kotlin.Function2' type=kotlin.Any
+                    RAW_FUNCTION_REFERENCE 'private final fun SplashScreen$lambda$4 ($navController: androidx.navigation.NavHostController, $$changed: kotlin.Int, $composer: androidx.compose.runtime.Composer?, $force: kotlin.Int): kotlin.Unit? declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt' type=kotlin.Any
+                    CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+                      method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (p1: androidx.compose.runtime.Composer?, p2: kotlin.Int?): kotlin.Unit? [fake_override,operator] declared in kotlin.jvm.internal.invokeDynamic.<fake>' type=kotlin.Any
+          BRANCH
+            if: CONST Boolean type=kotlin.Boolean value=true
+            then: CONST Null type=kotlin.Any? value=null
+
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.generate(FunctionCodegen.kt:47)
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.generate$default(FunctionCodegen.kt:40)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generateMethodNode(ClassCodegen.kt:406)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generateMethod(ClassCodegen.kt:423)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generate(ClassCodegen.kt:168)
+	at org.jetbrains.kotlin.backend.jvm.FileCodegen.lower(JvmPhases.kt:39)
+	at org.jetbrains.kotlin.backend.common.phaser.PhaseFactoriesKt.createFilePhase$lambda$4(PhaseFactories.kt:71)
+	at org.jetbrains.kotlin.backend.common.phaser.PhaseBuildersKt$createSimpleNamedCompilerPhase$1.phaseBody(PhaseBuilders.kt:69)
+	at org.jetbrains.kotlin.backend.common.phaser.SimpleNamedCompilerPhase.phaseBody(CompilerPhase.kt:226)
+	at org.jetbrains.kotlin.backend.common.phaser.AbstractNamedCompilerPhase.invoke(CompilerPhase.kt:113)
+	at org.jetbrains.kotlin.backend.common.phaser.PerformByIrFilePhase.invokeSequential(performByIrFile.kt:62)
+	... 44 more
+Caused by: java.lang.RuntimeException: Exception while generating code for:
+FUN INLINE_LAMBDA name:SplashScreen$lambda$2 visibility:private modality:FINAL <> ($navController:androidx.navigation.NavHostController) returnType:@[ExtensionFunctionType] kotlin.coroutines.SuspendFunction1<kotlinx.coroutines.CoroutineScope, kotlin.Unit>
+  VALUE_PARAMETER BOUND_VALUE_PARAMETER name:$navController index:0 type:androidx.navigation.NavHostController
+  BLOCK_BODY
+    VAR name:$i$a$-cache-SplashScreenKt$SplashScreen$1 type:kotlin.Int [val]
+      CONST Int type=kotlin.Int value=0
+    RETURN type=kotlin.Nothing from='private final fun SplashScreen$lambda$2 ($navController: androidx.navigation.NavHostController): @[ExtensionFunctionType] kotlin.coroutines.SuspendFunction1<kotlinx.coroutines.CoroutineScope, kotlin.Unit> declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt'
+      BLOCK type=com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> origin=null
+        CLASS SUSPEND_LAMBDA CLASS name:<no name provided> modality:FINAL visibility:public/*package*/ superTypes:[kotlin.coroutines.jvm.internal.SuspendLambda; kotlin.jvm.functions.Function2<kotlinx.coroutines.CoroutineScope, kotlin.coroutines.Continuation<kotlin.Unit>?, kotlin.Any?>]
+          $this: VALUE_PARAMETER INSTANCE_RECEIVER name:<this> type:com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>
+          FIELD name:label type:kotlin.Int visibility:public/*package*/
+          CONSTRUCTOR SUSPEND_LAMBDA visibility:public/*package*/ <> ($navController:androidx.navigation.NavHostController, $completion:kotlin.coroutines.Continuation<com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>>?) returnType:com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> [primary]
+            VALUE_PARAMETER BOUND_VALUE_PARAMETER name:$navController index:0 type:androidx.navigation.NavHostController
+            VALUE_PARAMETER name:$completion index:1 type:kotlin.coroutines.Continuation<com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>>?
+            BLOCK_BODY
+              SET_FIELD 'FIELD FIELD_FOR_CAPTURED_VALUE name:$navController type:androidx.navigation.NavHostController visibility:public/*package*/ [final] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>' type=kotlin.Unit origin=INITIALIZER_OF_FIELD_FOR_CAPTURED_VALUE
+                receiver: GET_VAR '<this>: com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>' type=com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> origin=null
+                value: GET_VAR '$navController: androidx.navigation.NavHostController declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>.<init>' type=androidx.navigation.NavHostController origin=null
+              DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> (arity: kotlin.Int, $completion: kotlin.coroutines.Continuation<kotlin.Any?>?) declared in kotlin.coroutines.jvm.internal.SuspendLambda'
+                arity: CONST Int type=kotlin.Int value=2
+                $completion: GET_VAR '$completion: kotlin.coroutines.Continuation<com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>>? declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>.<init>' type=kotlin.coroutines.Continuation<com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>>? origin=null
+              BLOCK type=kotlin.Unit origin=null
+          FUN name:invokeSuspend visibility:public modality:FINAL <> ($this:com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>, $result:kotlin.Result<kotlin.Any?>) returnType:kotlin.Any?
+            overridden:
+              protected abstract fun invokeSuspend ($result: kotlin.Result<kotlin.Any?>): kotlin.Any? declared in kotlin.coroutines.jvm.internal.SuspendLambda
+            $this: VALUE_PARAMETER INSTANCE_RECEIVER name:<this> type:com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>
+            VALUE_PARAMETER name:$result index:0 type:kotlin.Result<kotlin.Any?>
+            BLOCK_BODY
+              CALL 'public final fun delay (timeMillis: kotlin.Long, $completion: kotlin.coroutines.Continuation<kotlin.Unit>): kotlin.Any? [suspend] declared in kotlinx.coroutines.DelayKt' type=kotlin.Unit origin=null
+                timeMillis: CONST Long type=kotlin.Long value=3000
+                $completion: GET_VAR '<this>: com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>.invokeSuspend' type=com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> origin=null
+              SET_FIELD 'FIELD IR_EXTERNAL_JAVA_DECLARATION_STUB name:visible type:kotlin.Int visibility:public [final,static] declared in android.R.attr' type=kotlin.Unit superQualifierSymbol=android.R.attr origin=EQ
+                value: CONST Int type=kotlin.Int value=1
+              CALL 'public final fun delay (timeMillis: kotlin.Long, $completion: kotlin.coroutines.Continuation<kotlin.Unit>): kotlin.Any? [suspend] declared in kotlinx.coroutines.DelayKt' type=kotlin.Unit origin=null
+                timeMillis: CONST Long type=kotlin.Long value=500
+                $completion: GET_VAR '<this>: com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>.invokeSuspend' type=com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> origin=null
+              CALL 'public final fun navigate (route: kotlin.String, builder: @[ExtensionFunctionType] kotlin.Function1<androidx.navigation.NavOptionsBuilder, kotlin.Unit>): kotlin.Unit [fake_override] declared in androidx.navigation.NavHostController' type=kotlin.Unit origin=null
+                $this: GET_FIELD 'FIELD FIELD_FOR_CAPTURED_VALUE name:$navController type:androidx.navigation.NavHostController visibility:public/*package*/ [final] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>' type=androidx.navigation.NavHostController origin=null
+                  receiver: GET_VAR '<this>: com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>.invokeSuspend' type=com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> origin=null
+                route: CONST String type=kotlin.String value="Home_Screen"
+                builder: BLOCK type=@[ExtensionFunctionType] kotlin.Function1<androidx.navigation.NavOptionsBuilder, kotlin.Unit> origin=LAMBDA
+                  COMPOSITE type=kotlin.Unit origin=null
+                  CALL 'public final fun <jvm-indy> <T> (dynamicCall: T of kotlin.jvm.internal.<jvm-indy>, bootstrapMethodHandle: kotlin.Any, vararg bootstrapMethodArguments: kotlin.Any): T of kotlin.jvm.internal.<jvm-indy> declared in kotlin.jvm.internal' type=@[ExtensionFunctionType] kotlin.Function1<androidx.navigation.NavOptionsBuilder, kotlin.Unit> origin=null
+                    <T>: @[ExtensionFunctionType] kotlin.Function1<androidx.navigation.NavOptionsBuilder, kotlin.Unit>
+                    dynamicCall: CALL 'public final fun invoke (): @[ExtensionFunctionType] kotlin.Function1<androidx.navigation.NavOptionsBuilder, kotlin.Unit> declared in kotlin.jvm.internal.invokeDynamic' type=@[ExtensionFunctionType] kotlin.Function1<androidx.navigation.NavOptionsBuilder, kotlin.Unit> origin=null
+                    bootstrapMethodHandle: CALL 'public final fun <jvm-method-handle> (tag: kotlin.Int, owner: kotlin.String, name: kotlin.String, descriptor: kotlin.String, isInterface: kotlin.Boolean): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+                      tag: CONST Int type=kotlin.Int value=6
+                      owner: CONST String type=kotlin.String value="java/lang/invoke/LambdaMetafactory"
+                      name: CONST String type=kotlin.String value="metafactory"
+                      descriptor: CONST String type=kotlin.String value="(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;"
+                      isInterface: CONST Boolean type=kotlin.Boolean value=false
+                    bootstrapMethodArguments: VARARG type=kotlin.Array<kotlin.Any> varargElementType=kotlin.Any
+                      CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+                        method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (p1: P1 of kotlin.Function1): R of kotlin.Function1 [operator] declared in kotlin.Function1' type=kotlin.Any
+                      RAW_FUNCTION_REFERENCE 'private final fun invokeSuspend$lambda$1 ($this$navigate: androidx.navigation.NavOptionsBuilder): kotlin.Unit? declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>' type=kotlin.Any
+                      CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+                        method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (p1: androidx.navigation.NavOptionsBuilder): kotlin.Unit? [fake_override,operator] declared in kotlin.jvm.internal.invokeDynamic.<fake>' type=kotlin.Any
+          FUN name:create visibility:public modality:FINAL <> ($this:com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>, value:kotlin.Any?, $completion:kotlin.coroutines.Continuation<kotlin.Nothing>) returnType:kotlin.coroutines.Continuation<kotlin.Unit>
+            overridden:
+              public open fun create (value: kotlin.Any?, $completion: kotlin.coroutines.Continuation<kotlin.Nothing>): kotlin.coroutines.Continuation<kotlin.Unit> declared in kotlin.coroutines.jvm.internal.SuspendLambda
+            $this: VALUE_PARAMETER INSTANCE_RECEIVER name:<this> type:com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>
+            VALUE_PARAMETER name:value index:0 type:kotlin.Any?
+            VALUE_PARAMETER name:$completion index:1 type:kotlin.coroutines.Continuation<kotlin.Nothing>
+            BLOCK_BODY
+              RETURN type=kotlin.Nothing from='public final fun create (value: kotlin.Any?, $completion: kotlin.coroutines.Continuation<kotlin.Nothing>): kotlin.coroutines.Continuation<kotlin.Unit> declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>'
+                CONSTRUCTOR_CALL 'public/*package*/ constructor <init> ($navController: androidx.navigation.NavHostController, $completion: kotlin.coroutines.Continuation<com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>>?) [primary] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>' type=com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> origin=null
+                  $navController: GET_FIELD 'FIELD FIELD_FOR_CAPTURED_VALUE name:$navController type:androidx.navigation.NavHostController visibility:public/*package*/ [final] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>' type=androidx.navigation.NavHostController origin=null
+                    receiver: GET_VAR '<this>: com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>.create' type=com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> origin=null
+                  $completion: GET_VAR '$completion: kotlin.coroutines.Continuation<kotlin.Nothing> declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>.create' type=kotlin.coroutines.Continuation<kotlin.Nothing> origin=null
+          FUN name:invoke visibility:public modality:FINAL <> ($this:com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>, p1:kotlinx.coroutines.CoroutineScope, p2:kotlin.coroutines.Continuation<kotlin.Unit>?) returnType:kotlin.Any?
+            overridden:
+              public abstract fun invoke (p1: P1 of kotlin.jvm.functions.Function2, p2: P2 of kotlin.jvm.functions.Function2): R of kotlin.jvm.functions.Function2 declared in kotlin.jvm.functions.Function2
+            $this: VALUE_PARAMETER INSTANCE_RECEIVER name:<this> type:com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>
+            VALUE_PARAMETER name:p1 index:0 type:kotlinx.coroutines.CoroutineScope
+            VALUE_PARAMETER name:p2 index:1 type:kotlin.coroutines.Continuation<kotlin.Unit>?
+            BLOCK_BODY
+              RETURN type=kotlin.Nothing from='public final fun invoke (p1: kotlinx.coroutines.CoroutineScope, p2: kotlin.coroutines.Continuation<kotlin.Unit>?): kotlin.Any? declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>'
+                CALL 'public final fun invokeSuspend ($result: kotlin.Result<kotlin.Any?>): kotlin.Any? declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>' type=kotlin.Any? origin=null
+                  $this: TYPE_OP type=com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> origin=IMPLICIT_CAST typeOperand=com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>
+                    CALL 'public final fun create (value: kotlin.Any?, $completion: kotlin.coroutines.Continuation<kotlin.Nothing>): kotlin.coroutines.Continuation<kotlin.Unit> declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>' type=kotlin.coroutines.Continuation<kotlin.Unit> origin=null
+                      $this: GET_VAR '<this>: com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>.invoke' type=com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> origin=null
+                      value: GET_VAR 'p1: kotlinx.coroutines.CoroutineScope declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>.invoke' type=kotlinx.coroutines.CoroutineScope origin=null
+                      $completion: GET_VAR 'p2: kotlin.coroutines.Continuation<kotlin.Unit>? declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>.invoke' type=kotlin.coroutines.Continuation<kotlin.Unit>? origin=null
+                  $result: CALL 'public final fun <unsafe-coerce> <T, R> (v: T of kotlin.jvm.internal.<unsafe-coerce>): R of kotlin.jvm.internal.<unsafe-coerce> declared in kotlin.jvm.internal' type=kotlin.Result<kotlin.Any?> origin=null
+                    <T>: kotlin.Any?
+                    <R>: kotlin.Result<kotlin.Any?>
+                    v: GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:kotlin.Unit visibility:public [final,static] declared in kotlin.Unit' type=kotlin.Unit origin=null
+          FIELD FIELD_FOR_CAPTURED_VALUE name:$navController type:androidx.navigation.NavHostController visibility:public/*package*/ [final]
+          FUN LOCAL_FUNCTION_FOR_LAMBDA name:invokeSuspend$lambda$1$lambda$0 visibility:private modality:FINAL <> ($this$popUpTo:androidx.navigation.PopUpToBuilder) returnType:kotlin.Unit?
+            VALUE_PARAMETER name:$this$popUpTo index:0 type:androidx.navigation.PopUpToBuilder
+            BLOCK_BODY
+              CALL 'public final fun <set-inclusive> (value: kotlin.Boolean): kotlin.Unit declared in androidx.navigation.PopUpToBuilder' type=kotlin.Unit origin=EQ
+                $this: GET_VAR '$this$popUpTo: androidx.navigation.PopUpToBuilder declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>.invokeSuspend$lambda$1$lambda$0' type=androidx.navigation.PopUpToBuilder origin=null
+                value: CONST Boolean type=kotlin.Boolean value=true
+          FUN LOCAL_FUNCTION_FOR_LAMBDA name:invokeSuspend$lambda$1 visibility:private modality:FINAL <> ($this$navigate:androidx.navigation.NavOptionsBuilder) returnType:kotlin.Unit?
+            VALUE_PARAMETER name:$this$navigate index:0 type:androidx.navigation.NavOptionsBuilder
+            BLOCK_BODY
+              CALL 'public final fun popUpTo (route: kotlin.String, popUpToBuilder: @[ExtensionFunctionType] kotlin.Function1<androidx.navigation.PopUpToBuilder, kotlin.Unit>): kotlin.Unit declared in androidx.navigation.NavOptionsBuilder' type=kotlin.Unit origin=null
+                $this: GET_VAR '$this$navigate: androidx.navigation.NavOptionsBuilder declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>.invokeSuspend$lambda$1' type=androidx.navigation.NavOptionsBuilder origin=null
+                route: CONST String type=kotlin.String value="Splash_Screen"
+                popUpToBuilder: BLOCK type=@[ExtensionFunctionType] kotlin.Function1<androidx.navigation.PopUpToBuilder, kotlin.Unit> origin=LAMBDA
+                  COMPOSITE type=kotlin.Unit origin=null
+                  CALL 'public final fun <jvm-indy> <T> (dynamicCall: T of kotlin.jvm.internal.<jvm-indy>, bootstrapMethodHandle: kotlin.Any, vararg bootstrapMethodArguments: kotlin.Any): T of kotlin.jvm.internal.<jvm-indy> declared in kotlin.jvm.internal' type=@[ExtensionFunctionType] kotlin.Function1<androidx.navigation.PopUpToBuilder, kotlin.Unit> origin=null
+                    <T>: @[ExtensionFunctionType] kotlin.Function1<androidx.navigation.PopUpToBuilder, kotlin.Unit>
+                    dynamicCall: CALL 'public final fun invoke (): @[ExtensionFunctionType] kotlin.Function1<androidx.navigation.PopUpToBuilder, kotlin.Unit> declared in kotlin.jvm.internal.invokeDynamic' type=@[ExtensionFunctionType] kotlin.Function1<androidx.navigation.PopUpToBuilder, kotlin.Unit> origin=null
+                    bootstrapMethodHandle: CALL 'public final fun <jvm-method-handle> (tag: kotlin.Int, owner: kotlin.String, name: kotlin.String, descriptor: kotlin.String, isInterface: kotlin.Boolean): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+                      tag: CONST Int type=kotlin.Int value=6
+                      owner: CONST String type=kotlin.String value="java/lang/invoke/LambdaMetafactory"
+                      name: CONST String type=kotlin.String value="metafactory"
+                      descriptor: CONST String type=kotlin.String value="(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;"
+                      isInterface: CONST Boolean type=kotlin.Boolean value=false
+                    bootstrapMethodArguments: VARARG type=kotlin.Array<kotlin.Any> varargElementType=kotlin.Any
+                      CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+                        method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (p1: P1 of kotlin.Function1): R of kotlin.Function1 [operator] declared in kotlin.Function1' type=kotlin.Any
+                      RAW_FUNCTION_REFERENCE 'private final fun invokeSuspend$lambda$1$lambda$0 ($this$popUpTo: androidx.navigation.PopUpToBuilder): kotlin.Unit? declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>' type=kotlin.Any
+                      CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+                        method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (p1: androidx.navigation.PopUpToBuilder): kotlin.Unit? [fake_override,operator] declared in kotlin.jvm.internal.invokeDynamic.<fake>' type=kotlin.Any
+          FUN BRIDGE name:invoke visibility:public modality:OPEN <> ($this:com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>, p1:kotlin.Any?, p2:kotlin.Any?) returnType:kotlin.Any?
+            $this: VALUE_PARAMETER INSTANCE_RECEIVER name:<this> type:com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>
+            VALUE_PARAMETER BRIDGE name:p1 index:0 type:kotlin.Any?
+            VALUE_PARAMETER BRIDGE name:p2 index:1 type:kotlin.Any?
+            EXPRESSION_BODY
+              RETURN type=kotlin.Nothing from='public open fun invoke (p1: kotlin.Any?, p2: kotlin.Any?): kotlin.Any? declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>'
+                CALL 'public final fun invoke (p1: kotlinx.coroutines.CoroutineScope, p2: kotlin.coroutines.Continuation<kotlin.Unit>?): kotlin.Any? declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>' type=kotlin.Any? origin=BRIDGE_DELEGATION
+                  $this: GET_VAR '<this>: com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>.invoke' type=com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> origin=null
+                  p1: TYPE_OP type=kotlinx.coroutines.CoroutineScope origin=IMPLICIT_CAST typeOperand=kotlinx.coroutines.CoroutineScope
+                    GET_VAR 'p1: kotlin.Any? declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>.invoke' type=kotlin.Any? origin=null
+                  p2: TYPE_OP type=kotlin.coroutines.Continuation<*> origin=IMPLICIT_CAST typeOperand=kotlin.coroutines.Continuation<*>
+                    GET_VAR 'p2: kotlin.Any? declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>.invoke' type=kotlin.Any? origin=null
+        CONSTRUCTOR_CALL 'public/*package*/ constructor <init> ($navController: androidx.navigation.NavHostController, $completion: kotlin.coroutines.Continuation<com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>>?) [primary] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>' type=com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> origin=null
+          $navController: GET_VAR '$navController: androidx.navigation.NavHostController declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2' type=androidx.navigation.NavHostController origin=null
+          $completion: CONST Null type=kotlin.Nothing? value=null
+
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.generate(FunctionCodegen.kt:47)
+	at org.jetbrains.kotlin.backend.jvm.codegen.IrSourceCompilerForInline.generateLambdaBody(IrSourceCompilerForInline.kt:67)
+	at org.jetbrains.kotlin.codegen.inline.ExpressionLambda.generateLambdaBody(LambdaInfo.kt:72)
+	at org.jetbrains.kotlin.backend.jvm.codegen.IrInlineCodegen.genValueAndPut(IrInlineCodegen.kt:100)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitCall$handleParameter(ExpressionCodegen.kt:616)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitCall(ExpressionCodegen.kt:644)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitCall(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.expressions.IrCall.accept(IrCall.kt:24)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitVariable(ExpressionCodegen.kt:790)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitVariable(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.declarations.IrVariable.accept(IrVariable.kt:36)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitStatementContainer(ExpressionCodegen.kt:579)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitContainerExpression(ExpressionCodegen.kt:593)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitContainerExpression(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.visitors.IrElementVisitor$DefaultImpls.visitBlock(IrElementVisitor.kt:122)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitBlock(ExpressionCodegen.kt:413)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitBlock(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.expressions.IrBlock.accept(IrBlock.kt:18)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.gen(ExpressionCodegen.kt:217)
+	at org.jetbrains.kotlin.backend.jvm.codegen.IrCallGenerator.genValueAndPut(IrCallGenerator.kt:48)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitCall$handleParameter(ExpressionCodegen.kt:616)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitCall(ExpressionCodegen.kt:644)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitCall(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.expressions.IrCall.accept(IrCall.kt:24)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitStatementContainer(ExpressionCodegen.kt:579)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitContainerExpression(ExpressionCodegen.kt:593)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitContainerExpression(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.visitors.IrElementVisitor$DefaultImpls.visitBlock(IrElementVisitor.kt:122)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitBlock(ExpressionCodegen.kt:413)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitBlock(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.expressions.IrBlock.accept(IrBlock.kt:18)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitWhen(ExpressionCodegen.kt:1101)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitWhen(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.expressions.IrWhen.accept(IrWhen.kt:24)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitStatementContainer(ExpressionCodegen.kt:579)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitBlockBody(ExpressionCodegen.kt:584)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitBlockBody(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.expressions.IrBlockBody.accept(IrBlockBody.kt:20)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.generate(ExpressionCodegen.kt:240)
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.doGenerate(FunctionCodegen.kt:123)
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.generate(FunctionCodegen.kt:44)
+	... 54 more
+Caused by: java.lang.RuntimeException: Exception while generating code for:
+FUN name:invokeSuspend visibility:public modality:FINAL <> ($this:com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>, $result:kotlin.Result<kotlin.Any?>) returnType:kotlin.Any?
+  overridden:
+    protected abstract fun invokeSuspend ($result: kotlin.Result<kotlin.Any?>): kotlin.Any? declared in kotlin.coroutines.jvm.internal.SuspendLambda
+  $this: VALUE_PARAMETER INSTANCE_RECEIVER name:<this> type:com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>
+  VALUE_PARAMETER name:$result index:0 type:kotlin.Result<kotlin.Any?>
+  BLOCK_BODY
+    CALL 'public final fun delay (timeMillis: kotlin.Long, $completion: kotlin.coroutines.Continuation<kotlin.Unit>): kotlin.Any? [suspend] declared in kotlinx.coroutines.DelayKt' type=kotlin.Unit origin=null
+      timeMillis: CONST Long type=kotlin.Long value=3000
+      $completion: GET_VAR '<this>: com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>.invokeSuspend' type=com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> origin=null
+    SET_FIELD 'FIELD IR_EXTERNAL_JAVA_DECLARATION_STUB name:visible type:kotlin.Int visibility:public [final,static] declared in android.R.attr' type=kotlin.Unit superQualifierSymbol=android.R.attr origin=EQ
+      value: CONST Int type=kotlin.Int value=1
+    CALL 'public final fun delay (timeMillis: kotlin.Long, $completion: kotlin.coroutines.Continuation<kotlin.Unit>): kotlin.Any? [suspend] declared in kotlinx.coroutines.DelayKt' type=kotlin.Unit origin=null
+      timeMillis: CONST Long type=kotlin.Long value=500
+      $completion: GET_VAR '<this>: com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>.invokeSuspend' type=com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> origin=null
+    CALL 'public final fun navigate (route: kotlin.String, builder: @[ExtensionFunctionType] kotlin.Function1<androidx.navigation.NavOptionsBuilder, kotlin.Unit>): kotlin.Unit [fake_override] declared in androidx.navigation.NavHostController' type=kotlin.Unit origin=null
+      $this: GET_FIELD 'FIELD FIELD_FOR_CAPTURED_VALUE name:$navController type:androidx.navigation.NavHostController visibility:public/*package*/ [final] declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>' type=androidx.navigation.NavHostController origin=null
+        receiver: GET_VAR '<this>: com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>.invokeSuspend' type=com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided> origin=null
+      route: CONST String type=kotlin.String value="Home_Screen"
+      builder: BLOCK type=@[ExtensionFunctionType] kotlin.Function1<androidx.navigation.NavOptionsBuilder, kotlin.Unit> origin=LAMBDA
+        COMPOSITE type=kotlin.Unit origin=null
+        CALL 'public final fun <jvm-indy> <T> (dynamicCall: T of kotlin.jvm.internal.<jvm-indy>, bootstrapMethodHandle: kotlin.Any, vararg bootstrapMethodArguments: kotlin.Any): T of kotlin.jvm.internal.<jvm-indy> declared in kotlin.jvm.internal' type=@[ExtensionFunctionType] kotlin.Function1<androidx.navigation.NavOptionsBuilder, kotlin.Unit> origin=null
+          <T>: @[ExtensionFunctionType] kotlin.Function1<androidx.navigation.NavOptionsBuilder, kotlin.Unit>
+          dynamicCall: CALL 'public final fun invoke (): @[ExtensionFunctionType] kotlin.Function1<androidx.navigation.NavOptionsBuilder, kotlin.Unit> declared in kotlin.jvm.internal.invokeDynamic' type=@[ExtensionFunctionType] kotlin.Function1<androidx.navigation.NavOptionsBuilder, kotlin.Unit> origin=null
+          bootstrapMethodHandle: CALL 'public final fun <jvm-method-handle> (tag: kotlin.Int, owner: kotlin.String, name: kotlin.String, descriptor: kotlin.String, isInterface: kotlin.Boolean): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+            tag: CONST Int type=kotlin.Int value=6
+            owner: CONST String type=kotlin.String value="java/lang/invoke/LambdaMetafactory"
+            name: CONST String type=kotlin.String value="metafactory"
+            descriptor: CONST String type=kotlin.String value="(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;"
+            isInterface: CONST Boolean type=kotlin.Boolean value=false
+          bootstrapMethodArguments: VARARG type=kotlin.Array<kotlin.Any> varargElementType=kotlin.Any
+            CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+              method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (p1: P1 of kotlin.Function1): R of kotlin.Function1 [operator] declared in kotlin.Function1' type=kotlin.Any
+            RAW_FUNCTION_REFERENCE 'private final fun invokeSuspend$lambda$1 ($this$navigate: androidx.navigation.NavOptionsBuilder): kotlin.Unit? declared in com.example.nytimesbooksapp.presentation.splash.SplashScreenKt.SplashScreen$lambda$2.<no name provided>' type=kotlin.Any
+            CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+              method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (p1: androidx.navigation.NavOptionsBuilder): kotlin.Unit? [fake_override,operator] declared in kotlin.jvm.internal.invokeDynamic.<fake>' type=kotlin.Any
+
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.generate(FunctionCodegen.kt:47)
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.generate$default(FunctionCodegen.kt:40)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generateMethodNode(ClassCodegen.kt:406)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generateMethod(ClassCodegen.kt:423)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generate(ClassCodegen.kt:168)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitClass(ExpressionCodegen.kt:1000)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitClass(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.declarations.IrClass.accept(IrClass.kt:72)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitStatementContainer(ExpressionCodegen.kt:579)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitContainerExpression(ExpressionCodegen.kt:593)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitContainerExpression(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.visitors.IrElementVisitor$DefaultImpls.visitBlock(IrElementVisitor.kt:122)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitBlock(ExpressionCodegen.kt:413)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitBlock(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.expressions.IrBlock.accept(IrBlock.kt:18)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitReturn(ExpressionCodegen.kt:1051)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitReturn(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.expressions.IrReturn.accept(IrReturn.kt:24)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitStatementContainer(ExpressionCodegen.kt:579)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitBlockBody(ExpressionCodegen.kt:584)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitBlockBody(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.expressions.IrBlockBody.accept(IrBlockBody.kt:20)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.generate(ExpressionCodegen.kt:240)
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.doGenerate(FunctionCodegen.kt:123)
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.generate(FunctionCodegen.kt:44)
+	... 94 more
+Caused by: java.lang.AssertionError: access of const val: SET_FIELD 'FIELD IR_EXTERNAL_JAVA_DECLARATION_STUB name:visible type:kotlin.Int visibility:public [final,static] declared in android.R.attr' type=kotlin.Unit superQualifierSymbol=android.R.attr origin=EQ
+  value: CONST Int type=kotlin.Int value=1
+
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitFieldAccess(ExpressionCodegen.kt:861)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitFieldAccess(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.visitors.IrElementVisitor$DefaultImpls.visitSetField(IrElementVisitor.kt:206)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitSetField(ExpressionCodegen.kt:908)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitSetField(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.expressions.IrSetField.accept(IrSetField.kt:21)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitStatementContainer(ExpressionCodegen.kt:579)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitBlockBody(ExpressionCodegen.kt:584)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitBlockBody(ExpressionCodegen.kt:138)
+	at org.jetbrains.kotlin.ir.expressions.IrBlockBody.accept(IrBlockBody.kt:20)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.generate(ExpressionCodegen.kt:240)
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.doGenerate(FunctionCodegen.kt:123)
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.generate(FunctionCodegen.kt:44)
+	... 118 more
+
+
